@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { getMe } from '@/lib/api/serverApi';
 import css from './Profile.module.css';
 
@@ -23,7 +24,12 @@ export const metadata: Metadata = {
 };
 
 const Profile = async () => {
-  const user = await getMe();
+  const user = await getMe().catch(() => null);
+
+  if (!user) {
+    redirect('/sign-in');
+  }
+
   const fallbackAvatar = 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg';
 
   return (
