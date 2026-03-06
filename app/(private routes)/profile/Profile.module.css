@@ -1,0 +1,57 @@
+.mainContent {
+	display: flex;
+	justify-content: center;
+	padding: 24px;
+}
+
+.profileCard {
+	width: 100%;
+	max-width: 520px;
+	background: #ffffff;
+	border: 1px solid #e5e7eb;
+	border-radius: 12px;
+	padding: 20px;
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 16px;
+}
+
+.formTitle {
+	margin: 0;
+	font-size: 1.5rem;
+}
+
+.editProfileButton {
+	text-decoration: none;
+	color: #1d4ed8;
+	border: 1px solid #bfdbfe;
+	background: #eff6ff;
+	border-radius: 8px;
+	padding: 6px 10px;
+}
+
+.avatarWrapper {
+	display: flex;
+	justify-content: center;
+	margin: 14px 0;
+}
+
+.avatar {
+	border-radius: 9999px;
+	object-fit: cover;
+	border: 2px solid #e5e7eb;
+}
+
+.profileInfo {
+	display: grid;
+	gap: 8px;
+}
+
+.profileInfo p {
+	margin: 0;
+}
