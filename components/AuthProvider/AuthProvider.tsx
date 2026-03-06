@@ -60,7 +60,7 @@ const AuthProvider = ({ children }: Props) => {
   }
 
   if (!isChecking && isPrivateRoute && !isAuthenticated) {
-    return null;
+    return <Loader />;
   }
 
   return children;
