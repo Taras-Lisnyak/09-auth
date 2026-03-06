@@ -1,4 +1,3 @@
-import { cookies } from 'next/headers';
 import { nextServer } from './api';
 import type { FetchNotesResponse } from '@/types/fetchNotesResponse';
 import type { Note } from '@/types/note';
@@ -57,7 +56,12 @@ const normalizeFetchNotesResponse = (payload: unknown): FetchNotesResponse => {
   return { notes: [], totalPages: 1 };
 };
 
-const getCookieHeader = async () => {
+const getCookieHeader = async (cookieHeader?: string) => {
+  if (cookieHeader !== undefined) {
+    return cookieHeader;
+  }
+
+  const { cookies } = await import('next/headers');
   const cookieStore = await cookies();
   return cookieStore.toString();
 };
@@ -109,10 +113,10 @@ export const fetchNoteById = async (id: string): Promise<Note> => {
   return response.data;
 };
 
-export const checkSession = async (): Promise<boolean> => {
+export const checkSession = async (cookieHeader?: string): Promise<boolean> => {
   const res = await nextServer.get<{ success?: boolean }>('/auth/session', {
     headers: {
-      Cookie: await getCookieHeader(),
+      Cookie: await getCookieHeader(cookieHeader),
     },
   });
 
@@ -128,10 +132,10 @@ export const getMe = async (): Promise<User> => {
   return toUser(response.data);
 };
 
-export const checkServerSession = async () => {
+export const checkServerSession = async (cookieHeader?: string) => {
   const res = await nextServer.get('/auth/session', {
     headers: {
-      Cookie: await getCookieHeader(),
+      Cookie: await getCookieHeader(cookieHeader),
     },
   });
 

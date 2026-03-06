@@ -1,19 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkServerSession } from './lib/api/serverApi';
 
 const privateRoutes = ['/profile', '/notes'];
 const publicRoutes = ['/sign-in', '/sign-up'];
 
-const getSetCookieHeaders = (response: Response): string[] => {
-  const headersWithGetSetCookie = response.headers as Headers & {
-    getSetCookie?: () => string[];
-  };
-
-  if (typeof headersWithGetSetCookie.getSetCookie === 'function') {
-    return headersWithGetSetCookie.getSetCookie().filter(Boolean);
+const toSetCookieArray = (setCookie: string | string[] | undefined): string[] => {
+  if (!setCookie) {
+    return [];
   }
 
-  const fallback = response.headers.get('set-cookie');
-  return fallback ? [fallback] : [];
+  return Array.isArray(setCookie) ? setCookie : [setCookie];
 };
 
 const attachSetCookies = (response: NextResponse, setCookies: string[]) => {
@@ -43,18 +39,11 @@ export async function proxy(request: NextRequest) {
 
   if (refreshToken) {
     try {
-      const sessionResponse = await fetch(new URL('/api/auth/session', request.url), {
-        method: 'GET',
-        headers: {
-          Cookie: request.headers.get('cookie') ?? '',
-        },
-        cache: 'no-store',
-      });
-
-      const data = (await sessionResponse.json()) as { success?: boolean };
+      const sessionResponse = await checkServerSession(request.headers.get('cookie') ?? '');
+      const data = sessionResponse.data as { success?: boolean };
 
       if (data.success) {
-        const setCookies = getSetCookieHeaders(sessionResponse);
+        const setCookies = toSetCookieArray(sessionResponse.headers['set-cookie']);
 
         if (isPublicRoute) {
           const response = NextResponse.redirect(new URL('/', request.url));
