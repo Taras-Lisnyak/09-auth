@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getMe, updateMe } from '@/lib/api/clientApi';
 import css from './EditProfilePage.module.css';
+import Loader from '@/components/Loader/Loader';
 
 const fallbackAvatar = 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg';
 
@@ -13,15 +14,32 @@ const EditProfile = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [avatar, setAvatar] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    getMe().then((user) => {
-      setUsername(user.username ?? '');
-      setEmail(user.email ?? '');
-      setAvatar(user.avatar ?? '');
-    });
-  }, []);
+    let isMounted = true;
+
+    getMe()
+      .then((user) => {
+        if (!isMounted) return;
+        setUsername(user.username ?? '');
+        setEmail(user.email ?? '');
+        setAvatar(user.avatar ?? '');
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        router.replace('/sign-in');
+      })
+      .finally(() => {
+        if (!isMounted) return;
+        setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
 
   const handleSaveUser = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -43,6 +61,10 @@ const EditProfile = () => {
   const handleCancel = () => {
     router.push('/profile');
   };
+
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <main className={css.mainContent}>

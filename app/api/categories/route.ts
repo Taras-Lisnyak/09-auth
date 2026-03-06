@@ -18,8 +18,9 @@ export async function GET() {
     return NextResponse.json(data);
   } catch (error) {
     if (isAxiosError(error)) {
-      if (error.response?.status === 401) {
-        // Categories are optional in the UI; return an empty list for guests.
+      if (error.response?.status === 401 || error.response?.status === 404) {
+        // Categories are optional in the UI; return an empty list for guests
+        // and when upstream categories endpoint is unavailable.
         return NextResponse.json([], { status: 200 });
       }
 

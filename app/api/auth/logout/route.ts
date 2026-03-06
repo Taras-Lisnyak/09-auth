@@ -5,28 +5,28 @@ import { isAxiosError } from 'axios';
 import { logErrorResponse } from '../../_utils/utils';
 
 export async function POST() {
-  try {
-    const cookieStore = await cookies();
+  const cookieStore = await cookies();
 
+  try {
     await api.post('/auth/logout', null, {
       headers: {
         Cookie: cookieStore.toString(),
       },
     });
-
-    cookieStore.delete('accessToken');
-    cookieStore.delete('refreshToken');
-
-    return NextResponse.json({ message: 'Logged out successfully' }, { status: 200 });
   } catch (error) {
     if (isAxiosError(error)) {
-      logErrorResponse(error.response?.data);
-      return NextResponse.json(
-        { error: error.message, response: error.response?.data },
-        { status: error.response?.status ?? 500 }
-      );
+      // Upstream may return 400/401 if session is already invalid.
+      // Treat it as logged out and clear local cookies anyway.
+      if (error.response?.status !== 400 && error.response?.status !== 401) {
+        logErrorResponse(error.response?.data);
+      }
+    } else {
+      logErrorResponse({ message: (error as Error).message });
     }
-    logErrorResponse({ message: (error as Error).message });
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
+
+  cookieStore.delete('accessToken');
+  cookieStore.delete('refreshToken');
+
+  return NextResponse.json({ message: 'Logged out successfully' }, { status: 200 });
 }
