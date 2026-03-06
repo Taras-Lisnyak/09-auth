@@ -8,12 +8,8 @@ import { logErrorResponse } from '../../_utils/utils';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const payload = {
-      email: body?.email,
-      password: body?.password,
-    };
 
-    const apiRes = await api.post('/auth/register', payload);
+    const apiRes = await api.post('auth/register', body);
 
     const cookieStore = await cookies();
     const setCookie = apiRes.headers['set-cookie'];
@@ -40,7 +36,7 @@ export async function POST(req: NextRequest) {
       logErrorResponse(error.response?.data);
       return NextResponse.json(
         { error: error.message, response: error.response?.data },
-        { status: error.response?.status ?? 500 }
+        { status: error.status }
       );
     }
     logErrorResponse({ message: (error as Error).message });

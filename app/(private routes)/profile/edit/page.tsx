@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getMe, updateMe } from '@/lib/api/clientApi';
+import { useAuthStore } from '@/lib/store/authStore';
 import css from './EditProfilePage.module.css';
 import Loader from '@/components/Loader/Loader';
 
@@ -11,6 +12,7 @@ const fallbackAvatar = 'https://ac.goit.global/fullstack/react/notehub-og-meta.j
 
 const EditProfile = () => {
   const router = useRouter();
+  const setUser = useAuthStore((state) => state.setUser);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [avatar, setAvatar] = useState('');
@@ -51,7 +53,8 @@ const EditProfile = () => {
 
     try {
       setIsSaving(true);
-      await updateMe({ username: trimmedUsername });
+      const updatedUser = await updateMe({ username: trimmedUsername });
+      setUser(updatedUser);
       router.push('/profile');
     } finally {
       setIsSaving(false);

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { QueryClient, dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { fetchNoteById } from "@/lib/api/serverApi";
-import NotePreview from "@/components/NotePreview/NotePreview";
+import NoteDetailsClient from "./NoteDetails.client";
 import type { Note } from "@/types/note";
 
 export async function generateMetadata({
@@ -54,18 +54,25 @@ export async function generateMetadata({
 
 export default async function NoteDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  let note: Note;
+  const normalizedIdMatch = id.match(/[a-z0-9]{20,}$/i);
+  const normalizedId = normalizedIdMatch ? normalizedIdMatch[0] : id;
+  const queryClient = new QueryClient();
 
   try {
-    note = await fetchNoteById(id);
+    await queryClient.prefetchQuery({
+      queryKey: ["note", normalizedId],
+      queryFn: () => fetchNoteById(normalizedId),
+    });
   } catch {
-    return <NotePreview errorMessage="Could not fetch note details. Please try again." />;
+    return <NoteDetailsClient id={normalizedId} />;
   }
 
-  if (!note) {
-    notFound();
-  }
+  const dehydratedState = dehydrate(queryClient);
 
-  return <NotePreview note={note} />;
+  return (
+    <HydrationBoundary state={dehydratedState}>
+      <NoteDetailsClient id={normalizedId} />
+    </HydrationBoundary>
+  );
 }
 
