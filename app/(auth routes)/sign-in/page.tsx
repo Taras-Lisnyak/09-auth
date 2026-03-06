@@ -40,12 +40,12 @@ const SignIn = () => {
 
         <div className={css.formGroup}>
           <label htmlFor="email">Email</label>
-          <input id="email" type="email" name="email" className={css.input} required />
+          <input id="email" type="email" name="email" className={css.input} autoComplete="email" required />
         </div>
 
         <div className={css.formGroup}>
           <label htmlFor="password">Password</label>
-          <input id="password" type="password" name="password" className={css.input} required />
+          <input id="password" type="password" name="password" className={css.input} autoComplete="current-password" required />
         </div>
 
         <div className={css.actions}>
