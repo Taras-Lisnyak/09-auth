@@ -10,13 +10,16 @@ export async function proxy(request: NextRequest) {
 
   const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
   const isPrivateRoute = privateRoutes.some((route) => pathname.startsWith(route));
-  const isAuthenticated = Boolean(accessToken || refreshToken);
+  const hasAccessToken = Boolean(accessToken);
+  const hasAnyToken = Boolean(accessToken || refreshToken);
 
-  if (!isAuthenticated && isPrivateRoute) {
+  if (!hasAnyToken && isPrivateRoute) {
     return NextResponse.redirect(new URL('/sign-in', request.url));
   }
 
-  if (isAuthenticated && isPublicRoute) {
+  // Redirect away from auth pages only when access token is present.
+  // A stale refresh token should not block visiting /sign-in.
+  if (hasAccessToken && isPublicRoute) {
     return NextResponse.redirect(new URL('/profile', request.url));
   }
 
